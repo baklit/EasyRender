@@ -1,10 +1,5 @@
 #include "RenderingUtil.h"
 
-void DrawPixel(int x, int y)
-{
-	
-}
-
 //Uses DDA (maybe use bresenham if perf is bad?)
 void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel)
 {
@@ -18,11 +13,12 @@ void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel)
 		steps = abs(dy);		
 	}
 
-	float xStep = dx / steps;
-	float yStep = dy / steps;
-
+	float xStep = (float) dx / (float) steps;
+	float yStep = (float) dy / (float) steps;
+	
 	float x = x1;
 	float y = y1;
+
 	for (int i = 0; i < steps; i++){
 		x += xStep;
 		y += yStep;
@@ -30,6 +26,28 @@ void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel)
 	}	
 }
 
+void DrawTri(Triangle *triangle, DrawStyle drawStyle)
+{
+	switch(drawStyle){
+		case DOTS:
+			screen[triangle->x1][triangle->y1] = *triangle->p1;
+			screen[triangle->x2][triangle->y2] = *triangle->p2;
+			screen[triangle->x3][triangle->y3] = *triangle->p3;
+			
+			break;
+
+		case LINES:
+			DrawLine(triangle->x1, triangle->y1,
+					triangle->x2, triangle->y2, triangle->p1);
+			
+			DrawLine(triangle->x2, triangle->y2,
+					triangle->x3, triangle->y3, triangle->p2);
+			
+			DrawLine(triangle->x3, triangle->y3,
+					triangle->x1, triangle->y1, triangle->p3);
+			break;
+	}
+}
 
 void PushOutput()
 {	

@@ -12,11 +12,21 @@ int main(int argc, char *argv[])
 	window = SDL_CreateWindow("EasyRender", 50, 50, WIDTH, HEIGHT, 0);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);	
 
-	Pixel clearPixel = {0, 0, 0, 0};
-	ClearOutput(&clearPixel);
+	ClearOutput(&(Pixel) {0, 0, 0, 0});
 
-	Pixel redPixel = {255, 0, 0, 0};
-	DrawLine(500, 100, 400, 200, &redPixel);
+	Triangle tri;
+	tri.x1 = 300;
+	tri.y1 = 200;
+	tri.x2 = 0;
+	tri.y2 = 0;
+	tri.x3 = 400;
+	tri.y3 = 400;
+	tri.p1 = &(Pixel) {255, 0, 0, 0};
+	tri.p2 = &(Pixel) {0, 255, 0, 0};
+	tri.p3 = &(Pixel) {0, 0, 255, 0};
+	
+	DrawTri(&tri, DOTS);
+	DrawTri(&tri, LINES);
 
 	PushOutput();
 
