@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
 	PushOutput();
 
-	SDL_Delay(2000);
+	SDL_Delay(10000);
 	
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

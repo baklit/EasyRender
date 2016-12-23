@@ -32,7 +32,9 @@ typedef enum{
 extern Pixel screen[WIDTH][HEIGHT];
 extern SDL_Renderer *renderer;
 
-void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel);
+Pixel Blend(Pixel *p1, Pixel *p2, float alpha);
+
+void DrawLine(int x1, int y1, int x2, int y2, Pixel *p1, Pixel *p2);
 void DrawTri(Triangle *triangle, DrawStyle drawSyle);
 void PushOutput();
 void ClearOutput(Pixel *pixel);

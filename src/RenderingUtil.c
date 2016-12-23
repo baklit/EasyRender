@@ -1,7 +1,17 @@
 #include "RenderingUtil.h"
 
+Pixel Blend(Pixel *p1, Pixel *p2, float alpha)
+{
+	return (Pixel) {
+		p1->r + (p2->r - p1->r)*alpha,
+		p1->g + (p2->g - p1->g)*alpha,
+		p1->b + (p2->b - p1->b)*alpha,
+		p1->d + (p2->d - p1->d)*alpha		
+	};
+}
+
 //Uses DDA (maybe use bresenham if perf is bad?)
-void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel)
+void DrawLine(int x1, int y1, int x2, int y2, Pixel *p1, Pixel *p2)
 {
 	int dx = x2 - x1;
 	int dy = y2 - y1;
@@ -22,7 +32,7 @@ void DrawLine(int x1, int y1, int x2, int y2, Pixel *pixel)
 	for (int i = 0; i < steps; i++){
 		x += xStep;
 		y += yStep;
-		screen[(int) x][(int) y] = *pixel;
+		screen[(int) x][(int) y] = Blend(p1, p2, (float) i / (float) steps);
 	}	
 }
 
@@ -38,13 +48,16 @@ void DrawTri(Triangle *triangle, DrawStyle drawStyle)
 
 		case LINES:
 			DrawLine(triangle->x1, triangle->y1,
-					triangle->x2, triangle->y2, triangle->p1);
+					triangle->x2, triangle->y2,
+				   	triangle->p1, triangle->p2);
 			
 			DrawLine(triangle->x2, triangle->y2,
-					triangle->x3, triangle->y3, triangle->p2);
+					triangle->x3, triangle->y3,
+				   	triangle->p2, triangle->p3);
 			
 			DrawLine(triangle->x3, triangle->y3,
-					triangle->x1, triangle->y1, triangle->p3);
+					triangle->x1, triangle->y1,
+				   	triangle->p3, triangle->p1);
 			break;
 	}
 }
