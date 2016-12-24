@@ -25,8 +25,7 @@ int main(int argc, char *argv[])
 	tri.p2 = &(Pixel) {0, 255, 0, 0};
 	tri.p3 = &(Pixel) {0, 0, 255, 0};
 	
-	DrawTri(&tri, DOTS);
-	DrawTri(&tri, LINES);
+	DrawTri(&tri, FILL);
 
 	PushOutput();
 
