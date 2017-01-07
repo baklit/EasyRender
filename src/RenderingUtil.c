@@ -3,7 +3,8 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define CLAMP(a, l, u) MIN(MAX(a, l), u) 
 
-#define NEAR_CLIPPING 0.01
+#define NEAR_CLIPPING 0.01f
+#define RASTERIZE_FIDELITY 0.75f
 
 Pixel Blend(Pixel *p1, Pixel *p2, float alpha)
 {
@@ -64,15 +65,15 @@ void Draw3DLine(Vec3 *v1, Vec3 *v2, Pixel *p1, Pixel *p2, int *min, int *max, Pi
 		steps = fabs(v2->y/v2->z - v1->y/v1->z) * HEIGHT;
 	}
 
-	double xStep = dx / steps;
-	double yStep = dy / steps;
-	double zStep = dz / steps;
+	double xStep = RASTERIZE_FIDELITY * dx / steps;
+	double yStep = RASTERIZE_FIDELITY * dy / steps;
+	double zStep = RASTERIZE_FIDELITY * dz / steps;
 
 	double x = v1->x;
 	double y = v1->y;
 	double z = v1->z;
 
-	for (int i = 0; i < steps; i++){
+	for (float i = 0; i < steps; i += RASTERIZE_FIDELITY){
 		x += xStep;
 		y += yStep;
 		z += zStep;
@@ -82,13 +83,11 @@ void Draw3DLine(Vec3 *v1, Vec3 *v2, Pixel *p1, Pixel *p2, int *min, int *max, Pi
 
 		Pixel newPix = Blend(p1, p2, (double) i / steps);
 
-		if (z > NEAR_CLIPPING && z < screen[newx][newy].d){
-	
-			if (newx >= 0 && newx < WIDTH && newy >= 0 && newy < HEIGHT){
+		if (newx >= 0 && newx < WIDTH && newy >= 0 && newy < HEIGHT){
+			if (z > NEAR_CLIPPING && z < screen[newx][newy].d){	
+				newPix.d = z;
 				screen[newx][newy] = newPix;
 			}
-		
-			screen[newx][newy].d = z;
 		}
 		
 		if (min && max && minPix && maxPix && newy>=0 && newy<HEIGHT){
