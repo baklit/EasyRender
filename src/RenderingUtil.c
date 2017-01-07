@@ -3,6 +3,8 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define CLAMP(a, l, u) MIN(MAX(a, l), u) 
 
+#define NEAR_CLIPPING 0.01
+
 Pixel Blend(Pixel *p1, Pixel *p2, float alpha)
 {
 	return (Pixel) {
@@ -51,48 +53,53 @@ void DrawLine(int x1, int y1, int x2, int y2, Pixel *p1, Pixel *p2, int *min, in
 
 void Draw3DLine(Vec3 *v1, Vec3 *v2, Pixel *p1, Pixel *p2, int *min, int *max, Pixel *minPix, Pixel *maxPix, Vec3 *minVec, Vec3 *maxVec)
 {
-	float dx = v2->x - v1->x;
-	float dy = v2->y - v1->y;
-	float dz = v2->z - v1->z;
-	float steps;
+	double dx = v2->x - v1->x;
+	double dy = v2->y - v1->y;
+	double dz = v2->z - v1->z;
+	double steps;
 
-	if (fabs(v2->x/v2->z - v1->x/v1->z) > fabs(v2->y/v2->z - v1->y/v1->z)){
-		steps = fabs(v2->x/v2->z - v1->x/v1->z)*WIDTH;
+	if (fabs(v2->x/v2->z - v1->x/v1->z) * WIDTH > fabs(v2->y/v2->z - v1->y/v1->z) * HEIGHT){
+		steps = fabs(v2->x/v2->z - v1->x/v1->z) * WIDTH;
 	}else{
-		steps = fabs(v2->y/v2->z - v1->y/v1->z)*HEIGHT;
+		steps = fabs(v2->y/v2->z - v1->y/v1->z) * HEIGHT;
 	}
 
-	float xStep = (float) dx / (float) steps;
-	float yStep = (float) dy / (float) steps;
-	float zStep = (float) dz / (float) steps;
+	double xStep = dx / steps;
+	double yStep = dy / steps;
+	double zStep = dz / steps;
 
-	float x = v1->x;
-	float y = v1->y;
-	float z = v1->z;
+	double x = v1->x;
+	double y = v1->y;
+	double z = v1->z;
 
 	for (int i = 0; i < steps; i++){
 		x += xStep;
 		y += yStep;
 		z += zStep;
 		
-		int newx = (int) ((((x/z)+1)/2) * WIDTH);
-		int newy = (int) ((((y/z)+1)/2) * HEIGHT);
+		int newx = (int) ((((x/z)+1.0f)/2.0f) * WIDTH);
+		int newy = (int) ((((y/z)+1.0f)/2.0f) * HEIGHT);
 
-		if (newx >= 0 && newx < WIDTH && newy >= 0 && newy < HEIGHT){
-			screen[newx][newy] = Blend(p1, p2, (float) i / (float) steps);
+		Pixel newPix = Blend(p1, p2, (double) i / steps);
+
+		if (z > NEAR_CLIPPING && z < screen[newx][newy].d){
+	
+			if (newx >= 0 && newx < WIDTH && newy >= 0 && newy < HEIGHT){
+				screen[newx][newy] = newPix;
+			}
+		
+			screen[newx][newy].d = z;
 		}
 		
-		screen[newx][newy].d = z;
-
 		if (min && max && minPix && maxPix && newy>=0 && newy<HEIGHT){
 			if (min[newy] > newx || min[newy] == 0){
 				min[newy] = newx;
-				minPix[newy] = screen[newx][newy];
+				minPix[newy] = newPix;
 				minVec[newy] = (Vec3) {x, y, z};
 			}
 			if (max[newy] < newx || max[newy] == 0){
 				max[newy] = newx;
-				maxPix[newy] = screen[newx][newy];
+				maxPix[newy] = newPix;
 				maxVec[newy] = (Vec3) {x, y, z};
 			}
 		}
